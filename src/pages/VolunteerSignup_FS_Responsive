@@ -1,0 +1,131 @@
+<apex:page controller="GW_Volunteers.VOL_CTRL_VolunteersSignupFS" language="{!strLanguage}" showheader="false" sidebar="false" standardStylesheets="false" cache="false">
+	<script src="https://www.google.com/recaptcha/api.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function timestamp() {
+            var response = document.getElementById("g-recaptcha-response");
+            if (response == null || response.value.trim() == "") {
+                //var elems = JSON.parse(document.getElementsByName("captcha_settings")[0].value);
+                //elems["ts"] = JSON.stringify(new Date().getTime());
+                //document.getElementsByName("captcha_settings")[0].value = JSON.stringify(elems);
+                var btn = document.getElementById('j_id0:frm:btnSave');
+                btn.setAttribute('disabled', 'true');
+                btn.setAttribute('title', 'Please check the reCAPTCHA box to enable Submit');
+            }
+        }
+        setInterval(timestamp, 500);
+    </script>
+    <script type="text/javascript">
+	function recaptchaCallback() {
+		var btn = document.getElementById('j_id0:frm:btnSave');
+		btn.removeAttribute('disabled');
+		btn.removeAttribute('title');
+	};
+</script>
+    <script type="text/javascript">
+    	function redirect(){
+            var errs = document.getElementsByClassName('errorMsg').length;
+            if (errs == 0)
+            	window.parent.location.href='http://dev-fj.sailonesolutions.com/thank-you-volunteer';
+        }
+    </script>
+    <script>
+    // make sure the multiselect lists are visible on small screens
+    	window.onresize = setMultiWidth;
+    	window.onload = setMultiWidth;
+        function setMultiWidth(){
+            var w = window.innerWidth;
+            var w2 = w / 2;
+            var w4 = w / 5;
+            var selectElems = document.getElementsByTagName("select");
+                // Set the max width of multi-select elements to keep them on the page with a small window size
+                for (var i = 0, len = selectElems.length; i < len; i++) {
+                    var multi = selectElems[i].getAttribute("multiple");
+                    var styleNone = selectElems[i].getAttribute("style");
+                    if (multi == "multiple") {
+                        if (styleNone != "display:none;"){
+                            style = "max-width: " + w2 + "px;";
+                            selectElems[i].setAttribute("style", style);
+                            }
+                    } else {
+                        if (styleNone != "display:none;"){
+                            style = "max-width: " + w4 + "px;";
+                            selectElems[i].setAttribute("style", style);
+                            }
+                    }
+                }
+        }
+    </script>
+    <apex:stylesheet value="{! $Resource.VolunteersCSS}" /> 
+    <div style="background:white; margin:auto;">
+        <div class="uk-panel" style="margin:auto; background:white; max-width:1000px;">
+        <apex:form id="frm" styleClass="uk-form" >
+            <!-- left column -->
+            <div class="uk-grid">
+            <div class="uk-width-medium-1-2">
+                <!-- first we specify the fields we require for Contact matching -->
+              	<div class="uk-form-row uk-width-5-6"><apex:inputField value="{!contact.FirstName}" id="txtFirstName" required="true" styleClass="uk-form-large uk-width-1-1 rsform-input-box" html-placeholder="First Name (required)"/></div>
+                <div class="uk-form-row uk-width-5-6 uk-margin-small-top" ><apex:inputField value="{!contact.LastName}" id="txtLastName" required="true" styleClass="uk-form-large uk-width-1-1 rsform-input-box" html-placeholder="Last Name (required)"/></div>
+                <div class="uk-form-row uk-width-5-6 uk-margin-small-top" ><apex:inputField value="{!contact.Email}" id="txtEmail" required="true" styleClass="uk-form-large uk-width-1-1 rsform-input-box" html-placeholder="Email (required)"/></div> 
+                <!-- Optional Fields -->
+                <apex:repeat value="{!$ObjectType.Contact.FieldSets.AFTDJ_Volunteers_Signup_Left}" var="f" >
+                    <!-- Picklists -->
+                    <apex:variable var="v" value="1" rendered="{!OR(f.Type == 'picklist',f.Type== 'multipicklist')}">
+                        <div class="uk-form-row uk-margin-small-top" >
+                            <div class="label">
+                                <apex:outputLabel value="{!f.Label}"/>
+                            </div>
+                            <div class="field">
+                                <apex:inputField value="{!Contact[f]}"  styleClass="cssInputFields" />
+                            </div>
+                        </div>
+                    </apex:variable>
+                    <!-- Input fields will have placeholder and input box styling-->
+                    <apex:variable var="v" value="1" rendered="{!NOT(OR(f.Type == 'picklist', f.Type== 'multipicklist'))}">
+                        <div class="uk-form-row uk-margin-small-top" ><apex:inputField value="{!Contact[f]}"  html-placeholder="{!f.Label}" 
+                            styleClass="uk-form-large uk-width-5-6 rsform-input-box" /></div>
+                    </apex:variable>
+                </apex:repeat>  
+            </div>
+            <!-- right column -->
+            <div class="uk-width-medium-1-2">
+                <!--  now add optional fields the user can specify -->
+                <apex:repeat value="{!$ObjectType.Contact.FieldSets.AFTDJ_Volunteers_Signup_Right}" var="f" >
+                    <apex:param name="disp" value="{!IF(f.Type == 'Picklist (Multi-Select)','multi','text')}"/>
+                    <!-- Picklists -->
+                    <apex:variable var="v" value="1" rendered="{!OR(f.Type == 'picklist',f.Type== 'multipicklist')}">
+                        <div class="uk-form-row uk-margin-small-top" >
+                            <div class="label">
+                                <apex:outputLabel value="{!f.Label}"/>
+                            </div>
+                            <div class="field">
+                                <apex:inputField value="{!Contact[f]}"  styleClass="cssInputFields" />
+                            </div>
+                        </div>
+                    </apex:variable>
+                    <!-- Input fields will have placeholder and input box styling-->
+                    <apex:variable var="v" value="1" rendered="{!NOT(OR(f.Type == 'picklist', f.Type== 'multipicklist'))}">
+                        <div class="uk-form-row uk-margin-small-top" ><apex:inputField value="{!Contact[f]}"  html-placeholder="{!f.Label}" 
+                            styleClass="uk-form-large uk-width-5-6 rsform-input-box" /></div>
+                    </apex:variable>
+                </apex:repeat>  
+                <!-- reCaptcha -->
+            	<div class="uk-form-row uk-margin-small-top" >
+                <div class="g-recaptcha" data-sitekey="6LcU3zcUAAAAAGnFD82CGnFUt_UuIWSfUX9aI52w" data-callback="recaptchaCallback"> </div>
+                </div>
+                <!-- Submit button with actions -->
+                <div class="uk-form-row uk-margin-small-top" >
+                        <apex:commandButton value="{!$Label.gw_volunteers__labelsubmitbutton}" id="btnSave" styleClass="uk-button uk-button-primary uk-button-large uk-align-center"
+                                            onclick="document.getElementById('{!$Component.btnSave}').disabled=true;DoSave();"  
+                                            oncomplete="redirect();" rerender="frm" title="Please check the reCAPTCHA box to enable Submit"/>
+                        <apex:actionFunction name="DoSave" action="{!Save}" />
+                </div>  
+                <!-- Not using the results message, we're doing a redirect -->
+                <!-- <div class="uk-form-row uk-margin-small-top" ><apex:outputLabel value="{!StrSaveResult}" /></div> -->
+                <!-- Error messages -->
+                <div class="uk-form-row uk-margin-small-top" ><apex:messages style="color:red;" /></div>
+            </div>
+            </div>
+        </apex:form>
+        </div>  
+    </div>
+</apex:page>
